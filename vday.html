@@ -352,4 +352,37 @@
       no.style.left = 'auto';
       no.style.top = 'auto';
       no.innerText = "No";
-      phraseIndex
+      phraseIndex = 0;
+
+      var yes = document.getElementById('yesBtn');
+      yes.innerText = "Hunji";
+      yes.style.backgroundColor = "#2ed573";
+      yes.style.transform = "scale(1)";
+      yes.style.fontSize = "1.5rem"; 
+      yes.style.padding = "15px 40px"; 
+      yes.onclick = sheSaidYes; 
+    }
+
+    function createConfetti() {
+      var c = document.createElement('div');
+      c.classList.add('confetti');
+      var colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff'];
+      c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.animationDuration = (Math.random() * 2 + 2) + 's';
+      document.body.appendChild(c);
+    }
+
+    function createFloatingHeart() {
+      var h = document.createElement('div');
+      h.classList.add('floater');
+      var emojis = ['❤️', '🌹', '💋', '🧸', '💍', '🥂'];
+      h.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+      h.style.left = Math.random() * 100 + 'vw';
+      h.style.animationDuration = (Math.random() * 3 + 3) + 's'; 
+      document.body.appendChild(h);
+    }
+  </script>
+
+</body>
+</html>

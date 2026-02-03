@@ -36,6 +36,19 @@
     margin-bottom: 20px;
     padding: 0 10px;
     z-index: 10;
+    min-height: 3.5rem; /* Keeps space reserved so layout doesn't jump */
+  }
+
+  /* Cursor for Typewriter Effect */
+  .cursor {
+    display: inline-block;
+    width: 3px;
+    background-color: white;
+    animation: blink 1s infinite;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
   }
 
   .bear {
@@ -143,7 +156,8 @@
   </audio>
 
   <div class="bear" id="mascot">🐻</div>
-  <h1 id="mainText">Manny, will you be my Valentine?</h1>
+  
+  <h1 id="mainText"></h1>
 
   <div class="btn-container">
     <button id="yesBtn" onclick="sheSaidYes()">Hunji</button>
@@ -153,29 +167,43 @@
   <div class="counter" id="visitCounter">Visits: 0</div>
 
   <script>
+    // --- TYPEWRITER CONFIG ---
+    const textToType = "Manny, will you be my Valentine?";
+    const typeSpeed = 100; // milliseconds per letter
+    let charIndex = 0;
+
+    function typeWriter() {
+      const title = document.getElementById("mainText");
+      if (charIndex < textToType.length) {
+        // Add the next character
+        title.innerHTML = textToType.substring(0, charIndex + 1) + '<span class="cursor">|</span>';
+        charIndex++;
+        setTimeout(typeWriter, typeSpeed);
+      } else {
+        // Remove cursor blinking after done (optional, but I kept it for style)
+        title.innerHTML = textToType + '<span class="cursor">|</span>';
+      }
+    }
+
     // --- VISITOR COUNTER LOGIC ---
-    // This runs immediately when page loads
     (function updateCounter() {
-      // Check if a counter exists in local storage
       let count = localStorage.getItem('manny_visit_count');
-      
-      // If no count exists (first time), start at 1. Otherwise, add 1.
       if (!count) {
         count = 1;
       } else {
         count = parseInt(count) + 1;
       }
-      
-      // Save the new count back to storage
       localStorage.setItem('manny_visit_count', count);
-      
-      // Display it
       document.getElementById('visitCounter').innerText = "Visits: " + count;
     })();
 
 
-    // --- MUSIC LOGIC ---
+    // --- WINDOW LOAD (Start Music & Typing) ---
     window.onload = function() {
+      // 1. Start Typing
+      typeWriter();
+
+      // 2. Start Music
       var audio = document.getElementById("bgMusic");
       audio.volume = 0.5; 
       var promise = audio.play();
@@ -217,19 +245,25 @@
     }
 
     function sheSaidYes() {
+      // 1. Change Text & Bear
       document.getElementById('mainText').innerText = "YAY! Love you Shona Ji! ❤️";
       document.getElementById('mascot').innerText = "🎉🐻🥂";
+      
+      // 2. Hide No Button
       document.getElementById('noBtn').style.display = 'none';
 
+      // 3. Transform Yes Button
       var yes = document.getElementById('yesBtn');
       yes.innerText = "It's a Date!";
       yes.style.transform = "scale(1.2)";
       yes.style.backgroundColor = "#ff4757";
       yes.onclick = resetPage;
 
+      // 4. FUN EFFECTS ACTIVATED
       document.body.classList.add('party-mode'); 
       document.getElementById('mascot').classList.add('spin-bear'); 
 
+      // 5. Start Particles (Confetti + Floating Hearts)
       confettiInterval = setInterval(createConfetti, 50);
       heartInterval = setInterval(createFloatingHeart, 100); 
     }
@@ -244,7 +278,12 @@
       document.body.classList.remove('party-mode');
       document.getElementById('mascot').classList.remove('spin-bear');
 
-      document.getElementById('mainText').innerText = "Manny, will you be my Valentine?";
+      // Reset Text with typewriter again? Or just show it? 
+      // Let's just show it to keep it simple, or re-run typewriter
+      charIndex = 0;
+      document.getElementById('mainText').innerHTML = "";
+      typeWriter(); // Re-type it for effect!
+      
       document.getElementById('mascot').innerText = "🐻";
 
       var no = document.getElementById('noBtn');

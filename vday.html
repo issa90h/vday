@@ -79,4 +79,191 @@
     cursor: pointer;
     font-weight: bold;
     transition: 0.2s;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    user-select: none; 
+  }
+
+  #yesBtn {
+    background-color: #2ed573;
+    color: white;
+    z-index: 10;
+  }
+
+  #noBtn {
+    background-color: #ff4757;
+    color: white;
+    position: absolute;
+    right: 20%; 
+  }
+
+  /* Falling Confetti */
+  .confetti {
+    position: fixed;
+    width: 12px;
+    height: 12px;
+    top: -20px;
+    z-index: 5;
+    animation: fall linear forwards;
+  }
+  @keyframes fall {
+    to { transform: translateY(110vh) rotate(720deg); }
+  }
+
+  /* Fun Effect 3: Floating Love Emojis */
+  .floater {
+    position: fixed;
+    font-size: 2rem;
+    bottom: -50px;
+    z-index: 4;
+    animation: floatUp linear forwards;
+    opacity: 0.8;
+  }
+  @keyframes floatUp {
+    to { transform: translateY(-110vh) rotate(20deg); }
+  }
+
+</style>
+</head>
+<body>
+
+  <audio id="bgMusic" loop>
+    <source src="https://p320.djpunjab.is/data/320/3132/3307/Tere%20Bin%20-%20Rabbi%20Shergill.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="bear" id="mascot">🐻</div>
+  <h1 id="mainText">Manny, will you be my Valentine?</h1>
+
+  <div class="btn-container">
+    <button id="yesBtn" onclick="sheSaidYes()">Hunji</button>
+    <button id="noBtn" onmouseover="dodge()" onclick="dodge()">No</button>
+  </div>
+
+  <script>
+    // --- MUSIC LOGIC ---
+    window.onload = function() {
+      var audio = document.getElementById("bgMusic");
+      audio.volume = 0.5; 
+      var promise = audio.play();
+      if (promise !== undefined) {
+        promise.catch(error => {
+          // If autoplay is blocked, wait for the first click to start music
+          document.body.addEventListener('click', function() {
+              audio.play();
+          }, { once: true });
+        });
+      }
+    };
+
+    // --- GAME VARIABLES ---
+    var phraseIndex = 0;
+    var phrases = ["No", "Too slow!", "Nice try", "Missed me!", "Try again!", "Catch me!"];
+    var confettiInterval = null;
+    var heartInterval = null; 
+
+    // --- FUNCTIONS ---
+    function dodge() {
+      var x = Math.random() * (window.innerWidth - 200);
+      var y = Math.random() * (window.innerHeight - 100);
+      if(x < 0) x = 0;
+      if(y < 0) y = 0;
+      
+      var no = document.getElementById('noBtn');
+      no.style.position = 'fixed';
+      no.style.left = x + 'px';
+      no.style.top = y + 'px';
+
+      phraseIndex++;
+      if (phraseIndex >= phrases.length) phraseIndex = 0;
+      no.innerText = phrases[phraseIndex];
+
+      var yes = document.getElementById('yesBtn');
+      var currentSize = parseFloat(window.getComputedStyle(yes).fontSize);
+      yes.style.fontSize = (currentSize + 5) + 'px';
+      yes.style.padding = "20px " + (currentSize + 20) + "px";
+    }
+
+    function sheSaidYes() {
+      // 1. Change Text & Bear
+      document.getElementById('mainText').innerText = "YAY! Love you Shona Ji! ❤️";
+      document.getElementById('mascot').innerText = "🎉🐻🥂";
+      
+      // 2. Hide No Button
+      document.getElementById('noBtn').style.display = 'none';
+
+      // 3. Transform Yes Button
+      var yes = document.getElementById('yesBtn');
+      yes.innerText = "It's a Date!";
+      yes.style.transform = "scale(1.2)";
+      yes.style.backgroundColor = "#ff4757";
+      yes.onclick = resetPage;
+
+      // 4. FUN EFFECTS ACTIVATED
+      document.body.classList.add('party-mode'); 
+      document.getElementById('mascot').classList.add('spin-bear'); 
+
+      // 5. Start Particles (Confetti + Floating Hearts)
+      confettiInterval = setInterval(createConfetti, 50);
+      heartInterval = setInterval(createFloatingHeart, 100); 
+    }
+
+    function resetPage() {
+      // 1. Stop Intervals
+      clearInterval(confettiInterval);
+      clearInterval(heartInterval);
+      
+      // 2. Remove all particles
+      document.querySelectorAll('.confetti').forEach(c => c.remove());
+      document.querySelectorAll('.floater').forEach(c => c.remove());
+
+      // 3. Stop Fun Effects
+      document.body.classList.remove('party-mode');
+      document.getElementById('mascot').classList.remove('spin-bear');
+
+      // 4. Reset Text
+      document.getElementById('mainText').innerText = "Manny, will you be my Valentine?";
+      document.getElementById('mascot').innerText = "🐻";
+
+      // 5. Reset Buttons
+      var no = document.getElementById('noBtn');
+      no.style.display = 'inline-block';
+      no.style.position = 'absolute'; 
+      no.style.right = '20%';
+      no.style.left = 'auto';
+      no.style.top = 'auto';
+      no.innerText = "No";
+      phraseIndex = 0;
+
+      var yes = document.getElementById('yesBtn');
+      yes.innerText = "Hunji";
+      yes.style.backgroundColor = "#2ed573";
+      yes.style.transform = "scale(1)";
+      yes.style.fontSize = "1.5rem"; 
+      yes.style.padding = "15px 40px"; 
+      yes.onclick = sheSaidYes; 
+    }
+
+    function createConfetti() {
+      var c = document.createElement('div');
+      c.classList.add('confetti');
+      var colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff'];
+      c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.animationDuration = (Math.random() * 2 + 2) + 's';
+      document.body.appendChild(c);
+    }
+
+    function createFloatingHeart() {
+      var h = document.createElement('div');
+      h.classList.add('floater');
+      // Random love emojis
+      var emojis = ['❤️', '🌹', '💋', '🧸', '💍', '🥂'];
+      h.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+      
+      h.style.left = Math.random() * 100 + 'vw';
+      h.style.animationDuration = (Math.random() * 3 + 3) + 's'; 
+      document.body.appendChild(h);
+    }
+  </script>
+
+</body>
+</html>

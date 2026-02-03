@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>For Manny ❤️</title>
 <style>
   body {
@@ -22,6 +23,7 @@
     font-size: 3rem;
     text-shadow: 2px 2px 5px rgba(0,0,0,0.2);
     margin-bottom: 20px;
+    padding: 0 10px;
   }
 
   .bear {
@@ -38,12 +40,13 @@
 
   .btn-container {
     position: relative;
-    width: 600px; /* Wide area for buttons */
+    width: 100%;
+    max-width: 600px;
     height: 150px;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 50px; /* Space between buttons */
+    gap: 30px;
   }
 
   button {
@@ -53,8 +56,10 @@
     border-radius: 50px;
     cursor: pointer;
     font-weight: bold;
-    transition: 0.2s; /* Smooth growing effect */
+    transition: 0.2s;
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    /* Prevent text selection so double tapping doesn't zoom */
+    user-select: none; 
   }
 
   #yesBtn {
@@ -66,8 +71,8 @@
   #noBtn {
     background-color: #ff4757;
     color: white;
-    position: absolute; /* Allows it to move freely */
-    right: 150px; /* Starting position */
+    position: absolute;
+    right: 20%; 
   }
 
   /* Confetti styling */
@@ -87,63 +92,84 @@
 </head>
 <body>
 
+  <audio id="bgMusic" loop>
+    <source src="https://www.bensound.com/bensound-music/bensound-love.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
   <div class="bear" id="mascot">🐻</div>
   <h1 id="mainText">Manny, will you be my Valentine?</h1>
 
   <div class="btn-container">
     <button id="yesBtn" onclick="sheSaidYes()">Hunji</button>
-    <button id="noBtn" onmouseover="dodge()">No</button>
+    <button id="noBtn" onmouseover="dodge()" onclick="dodge()">No</button>
   </div>
 
   <script>
+    // --- MUSIC AUTOPLAY LOGIC ---
+    window.onload = function() {
+      var audio = document.getElementById("bgMusic");
+      // Reduce volume slightly so it's not a jumpscare
+      audio.volume = 0.5; 
+
+      // Try to play immediately
+      var promise = audio.play();
+
+      if (promise !== undefined) {
+        promise.catch(error => {
+          // If autoplay is blocked, wait for the first interaction
+          console.log("Autoplay blocked. Waiting for click.");
+          document.body.addEventListener('click', function() {
+              audio.play();
+          }, { once: true }); // {once:true} means it only runs the first time
+        });
+      }
+    };
+
+    // --- BUTTON LOGIC ---
     var phraseIndex = 0;
     var phrases = ["No", "Too slow!", "Nice try", "Missed me!", "Try again!", "Catch me!"];
 
     function dodge() {
-      // 1. Move the No button randomly
       var x = Math.random() * (window.innerWidth - 200);
       var y = Math.random() * (window.innerHeight - 100);
       
+      // Ensure it stays within view
+      if(x < 0) x = 0;
+      if(y < 0) y = 0;
+      
       var no = document.getElementById('noBtn');
-      no.style.position = 'fixed'; // Break it out of the layout
+      no.style.position = 'fixed';
       no.style.left = x + 'px';
       no.style.top = y + 'px';
 
-      // 2. Change the text
       phraseIndex++;
       if (phraseIndex >= phrases.length) phraseIndex = 0;
       no.innerText = phrases[phraseIndex];
 
-      // 3. Make the YES button grow (Guilt Trip!)
       var yes = document.getElementById('yesBtn');
       var currentSize = parseFloat(window.getComputedStyle(yes).fontSize);
-      yes.style.fontSize = (currentSize + 10) + 'px';
-      yes.style.padding = "20px " + (currentSize + 50) + "px";
+      yes.style.fontSize = (currentSize + 5) + 'px';
+      yes.style.padding = "20px " + (currentSize + 20) + "px";
     }
 
     function sheSaidYes() {
-      // 1. Update text and bear
       document.getElementById('mainText').innerText = "YAY! Love you Shona Ji! ❤️";
       document.getElementById('mascot').innerText = "🎉🐻🥂";
-      
-      // 2. Hide No button
       document.getElementById('noBtn').style.display = 'none';
 
-      // 3. Style Yes button
       var yes = document.getElementById('yesBtn');
       yes.innerText = "It's a Date!";
       yes.style.transform = "scale(1.2)";
       yes.style.backgroundColor = "#ff4757";
-      yes.onclick = null; // Disable clicking it again
+      yes.onclick = null;
 
-      // 4. Start Confetti
       setInterval(createConfetti, 50);
     }
 
     function createConfetti() {
       var c = document.createElement('div');
       c.classList.add('confetti');
-      // Random colors
       var colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff'];
       c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
       c.style.left = Math.random() * 100 + 'vw';

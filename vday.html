@@ -58,7 +58,6 @@
     font-weight: bold;
     transition: 0.2s;
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    /* Prevent text selection so double tapping doesn't zoom */
     user-select: none; 
   }
 
@@ -94,7 +93,6 @@
 
   <audio id="bgMusic" loop>
     <source src="https://www.bensound.com/bensound-music/bensound-love.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
   </audio>
 
   <div class="bear" id="mascot">🐻</div>
@@ -106,22 +104,16 @@
   </div>
 
   <script>
-    // --- MUSIC AUTOPLAY LOGIC ---
+    // --- MUSIC LOGIC ---
     window.onload = function() {
       var audio = document.getElementById("bgMusic");
-      // Reduce volume slightly so it's not a jumpscare
       audio.volume = 0.5; 
-
-      // Try to play immediately
       var promise = audio.play();
-
       if (promise !== undefined) {
         promise.catch(error => {
-          // If autoplay is blocked, wait for the first interaction
-          console.log("Autoplay blocked. Waiting for click.");
           document.body.addEventListener('click', function() {
               audio.play();
-          }, { once: true }); // {once:true} means it only runs the first time
+          }, { once: true });
         });
       }
     };
@@ -134,7 +126,6 @@
       var x = Math.random() * (window.innerWidth - 200);
       var y = Math.random() * (window.innerHeight - 100);
       
-      // Ensure it stays within view
       if(x < 0) x = 0;
       if(y < 0) y = 0;
       
@@ -162,7 +153,12 @@
       yes.innerText = "It's a Date!";
       yes.style.transform = "scale(1.2)";
       yes.style.backgroundColor = "#ff4757";
-      yes.onclick = null;
+      
+      // THIS IS THE NEW PART:
+      // Instead of doing nothing, we tell it to reload the page when clicked
+      yes.onclick = function() {
+          location.reload(); 
+      };
 
       setInterval(createConfetti, 50);
     }

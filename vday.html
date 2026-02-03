@@ -74,7 +74,6 @@
     right: 20%; 
   }
 
-  /* Confetti styling */
   .confetti {
     position: fixed;
     width: 12px;
@@ -118,10 +117,12 @@
       }
     };
 
-    // --- BUTTON LOGIC ---
+    // --- GAME VARIABLES ---
     var phraseIndex = 0;
     var phrases = ["No", "Too slow!", "Nice try", "Missed me!", "Try again!", "Catch me!"];
+    var confettiInterval = null;
 
+    // --- FUNCTIONS ---
     function dodge() {
       var x = Math.random() * (window.innerWidth - 200);
       var y = Math.random() * (window.innerHeight - 100);
@@ -145,22 +146,52 @@
     }
 
     function sheSaidYes() {
+      // 1. Change Text
       document.getElementById('mainText').innerText = "YAY! Love you Shona Ji! ❤️";
       document.getElementById('mascot').innerText = "🎉🐻🥂";
+      
+      // 2. Hide No Button
       document.getElementById('noBtn').style.display = 'none';
 
+      // 3. Transform Yes Button into Reset Button
       var yes = document.getElementById('yesBtn');
       yes.innerText = "It's a Date!";
       yes.style.transform = "scale(1.2)";
       yes.style.backgroundColor = "#ff4757";
-      
-      // THIS IS THE NEW PART:
-      // Instead of doing nothing, we tell it to reload the page when clicked
-      yes.onclick = function() {
-          location.reload(); 
-      };
+      yes.onclick = resetPage; // Now clicking it calls resetPage
 
-      setInterval(createConfetti, 50);
+      // 4. Start Confetti
+      confettiInterval = setInterval(createConfetti, 50);
+    }
+
+    function resetPage() {
+      // 1. Stop Confetti & Clear Screen
+      clearInterval(confettiInterval);
+      var allConfetti = document.querySelectorAll('.confetti');
+      allConfetti.forEach(c => c.remove());
+
+      // 2. Reset Text
+      document.getElementById('mainText').innerText = "Manny, will you be my Valentine?";
+      document.getElementById('mascot').innerText = "🐻";
+
+      // 3. Reset No Button
+      var no = document.getElementById('noBtn');
+      no.style.display = 'inline-block';
+      no.style.position = 'absolute'; // Put it back in container
+      no.style.right = '20%';
+      no.style.left = 'auto';
+      no.style.top = 'auto';
+      no.innerText = "No";
+      phraseIndex = 0;
+
+      // 4. Reset Yes Button
+      var yes = document.getElementById('yesBtn');
+      yes.innerText = "Hunji";
+      yes.style.backgroundColor = "#2ed573";
+      yes.style.transform = "scale(1)";
+      yes.style.fontSize = "1.5rem"; // Reset size
+      yes.style.padding = "15px 40px"; // Reset padding
+      yes.onclick = sheSaidYes; // Re-attach the success function
     }
 
     function createConfetti() {

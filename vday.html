@@ -17,6 +17,7 @@
     overflow: hidden;
     text-align: center;
     transition: background 0.5s;
+    cursor: crosshair; /* Hints that the cursor does something! */
   }
 
   /* Fun Effect 1: Disco Background Animation */
@@ -36,7 +37,8 @@
     margin-bottom: 20px;
     padding: 0 10px;
     z-index: 10;
-    min-height: 3.5rem; /* Keeps space reserved so layout doesn't jump */
+    min-height: 3.5rem; 
+    pointer-events: none; /* Lets clicks pass through to the trail */
   }
 
   /* Cursor for Typewriter Effect */
@@ -57,6 +59,14 @@
     animation: bounce 2s infinite ease-in-out;
     display: block;
     z-index: 10;
+    cursor: pointer;
+    transition: transform 0.1s;
+    user-select: none;
+  }
+  
+  /* Squeak animation for clicking the bear */
+  .bear:active {
+    transform: scale(0.8) translateY(10px) !important;
   }
 
   /* Fun Effect 2: Spinning Bear */
@@ -94,12 +104,12 @@
     transition: 0.2s;
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     user-select: none; 
+    z-index: 100; /* Ensure buttons are above the trail */
   }
 
   #yesBtn {
     background-color: #2ed573;
     color: white;
-    z-index: 10;
   }
 
   #noBtn {
@@ -117,12 +127,13 @@
     top: -20px;
     z-index: 5;
     animation: fall linear forwards;
+    pointer-events: none;
   }
   @keyframes fall {
     to { transform: translateY(110vh) rotate(720deg); }
   }
 
-  /* Fun Effect 3: Floating Love Emojis */
+  /* Floating Love Emojis */
   .floater {
     position: fixed;
     font-size: 2rem;
@@ -130,9 +141,23 @@
     z-index: 4;
     animation: floatUp linear forwards;
     opacity: 0.8;
+    pointer-events: none;
   }
   @keyframes floatUp {
     to { transform: translateY(-110vh) rotate(20deg); }
+  }
+
+  /* MAGIC TRAIL HEARTS */
+  .trail-heart {
+    position: fixed;
+    font-size: 20px;
+    pointer-events: none;
+    animation: fadeUp 1s forwards;
+    z-index: 1;
+  }
+  @keyframes fadeUp {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -150%) scale(0.5); opacity: 0; }
   }
 
   /* VISITOR COUNTER STYLE */
@@ -155,7 +180,7 @@
     <source src="https://p320.djpunjab.is/data/320/3132/3307/Tere%20Bin%20-%20Rabbi%20Shergill.mp3" type="audio/mpeg">
   </audio>
 
-  <div class="bear" id="mascot">🐻</div>
+  <div class="bear" id="mascot" onclick="pokeBear()">🐻</div>
   
   <h1 id="mainText"></h1>
 
@@ -169,18 +194,16 @@
   <script>
     // --- TYPEWRITER CONFIG ---
     const textToType = "Manny, will you be my Valentine?";
-    const typeSpeed = 100; // milliseconds per letter
+    const typeSpeed = 100; 
     let charIndex = 0;
 
     function typeWriter() {
       const title = document.getElementById("mainText");
       if (charIndex < textToType.length) {
-        // Add the next character
         title.innerHTML = textToType.substring(0, charIndex + 1) + '<span class="cursor">|</span>';
         charIndex++;
         setTimeout(typeWriter, typeSpeed);
       } else {
-        // Remove cursor blinking after done (optional, but I kept it for style)
         title.innerHTML = textToType + '<span class="cursor">|</span>';
       }
     }
@@ -197,13 +220,55 @@
       document.getElementById('visitCounter').innerText = "Visits: " + count;
     })();
 
+    // --- MAGIC CURSOR TRAIL LOGIC ---
+    let lastX = 0;
+    let lastY = 0;
+    
+    document.addEventListener('mousemove', function(e) {
+      createTrail(e.clientX, e.clientY);
+    });
+    
+    document.addEventListener('touchmove', function(e) {
+      // Prevent scrolling while drawing hearts
+      // e.preventDefault(); 
+      createTrail(e.touches[0].clientX, e.touches[0].clientY);
+    });
 
-    // --- WINDOW LOAD (Start Music & Typing) ---
+    function createTrail(x, y) {
+      // Only create a heart if moved enough (performance)
+      if (Math.abs(x - lastX) < 10 && Math.abs(y - lastY) < 10) return;
+      lastX = x;
+      lastY = y;
+
+      const heart = document.createElement('div');
+      heart.classList.add('trail-heart');
+      heart.innerText = '❤️'; 
+      heart.style.left = x + 'px';
+      heart.style.top = y + 'px';
+      
+      // Randomize size slightly
+      const size = Math.random() * 20 + 10;
+      heart.style.fontSize = size + 'px';
+
+      document.body.appendChild(heart);
+
+      // Remove after animation
+      setTimeout(() => {
+        heart.remove();
+      }, 1000);
+    }
+
+    // --- INTERACTIVE BEAR ---
+    function pokeBear() {
+      // Burst hearts from center
+      for(let i=0; i<5; i++) {
+        createTrail(window.innerWidth/2 + (Math.random()*100 - 50), window.innerHeight/3 + (Math.random()*100 - 50));
+      }
+    }
+
+    // --- WINDOW LOAD ---
     window.onload = function() {
-      // 1. Start Typing
       typeWriter();
-
-      // 2. Start Music
       var audio = document.getElementById("bgMusic");
       audio.volume = 0.5; 
       var promise = audio.play();
@@ -245,25 +310,21 @@
     }
 
     function sheSaidYes() {
-      // 1. Change Text & Bear
       document.getElementById('mainText').innerText = "YAY! Love you Shona Ji! ❤️";
       document.getElementById('mascot').innerText = "🎉🐻🥂";
-      
-      // 2. Hide No Button
       document.getElementById('noBtn').style.display = 'none';
 
-      // 3. Transform Yes Button
       var yes = document.getElementById('yesBtn');
       yes.innerText = "It's a Date!";
       yes.style.transform = "scale(1.2)";
       yes.style.backgroundColor = "#ff4757";
+      
+      // Simple reset on click
       yes.onclick = resetPage;
 
-      // 4. FUN EFFECTS ACTIVATED
       document.body.classList.add('party-mode'); 
       document.getElementById('mascot').classList.add('spin-bear'); 
 
-      // 5. Start Particles (Confetti + Floating Hearts)
       confettiInterval = setInterval(createConfetti, 50);
       heartInterval = setInterval(createFloatingHeart, 100); 
     }
@@ -278,11 +339,9 @@
       document.body.classList.remove('party-mode');
       document.getElementById('mascot').classList.remove('spin-bear');
 
-      // Reset Text with typewriter again? Or just show it? 
-      // Let's just show it to keep it simple, or re-run typewriter
       charIndex = 0;
       document.getElementById('mainText').innerHTML = "";
-      typeWriter(); // Re-type it for effect!
+      typeWriter(); 
       
       document.getElementById('mascot').innerText = "🐻";
 
@@ -293,37 +352,4 @@
       no.style.left = 'auto';
       no.style.top = 'auto';
       no.innerText = "No";
-      phraseIndex = 0;
-
-      var yes = document.getElementById('yesBtn');
-      yes.innerText = "Hunji";
-      yes.style.backgroundColor = "#2ed573";
-      yes.style.transform = "scale(1)";
-      yes.style.fontSize = "1.5rem"; 
-      yes.style.padding = "15px 40px"; 
-      yes.onclick = sheSaidYes; 
-    }
-
-    function createConfetti() {
-      var c = document.createElement('div');
-      c.classList.add('confetti');
-      var colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff'];
-      c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-      c.style.left = Math.random() * 100 + 'vw';
-      c.style.animationDuration = (Math.random() * 2 + 2) + 's';
-      document.body.appendChild(c);
-    }
-
-    function createFloatingHeart() {
-      var h = document.createElement('div');
-      h.classList.add('floater');
-      var emojis = ['❤️', '🌹', '💋', '🧸', '💍', '🥂'];
-      h.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-      h.style.left = Math.random() * 100 + 'vw';
-      h.style.animationDuration = (Math.random() * 3 + 3) + 's'; 
-      document.body.appendChild(h);
-    }
-  </script>
-
-</body>
-</html>
+      phraseIndex

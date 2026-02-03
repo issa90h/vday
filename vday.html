@@ -122,6 +122,18 @@
     to { transform: translateY(-110vh) rotate(20deg); }
   }
 
+  /* VISITOR COUNTER STYLE */
+  .counter {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.8rem;
+    background: rgba(0, 0, 0, 0.1);
+    padding: 5px 10px;
+    border-radius: 10px;
+    z-index: 2;
+  }
 </style>
 </head>
 <body>
@@ -138,7 +150,30 @@
     <button id="noBtn" onmouseover="dodge()" onclick="dodge()">No</button>
   </div>
 
+  <div class="counter" id="visitCounter">Visits: 0</div>
+
   <script>
+    // --- VISITOR COUNTER LOGIC ---
+    // This runs immediately when page loads
+    (function updateCounter() {
+      // Check if a counter exists in local storage
+      let count = localStorage.getItem('manny_visit_count');
+      
+      // If no count exists (first time), start at 1. Otherwise, add 1.
+      if (!count) {
+        count = 1;
+      } else {
+        count = parseInt(count) + 1;
+      }
+      
+      // Save the new count back to storage
+      localStorage.setItem('manny_visit_count', count);
+      
+      // Display it
+      document.getElementById('visitCounter').innerText = "Visits: " + count;
+    })();
+
+
     // --- MUSIC LOGIC ---
     window.onload = function() {
       var audio = document.getElementById("bgMusic");
@@ -146,7 +181,6 @@
       var promise = audio.play();
       if (promise !== undefined) {
         promise.catch(error => {
-          // If autoplay is blocked, wait for the first click to start music
           document.body.addEventListener('click', function() {
               audio.play();
           }, { once: true });
@@ -183,47 +217,36 @@
     }
 
     function sheSaidYes() {
-      // 1. Change Text & Bear
       document.getElementById('mainText').innerText = "YAY! Love you Shona Ji! ❤️";
       document.getElementById('mascot').innerText = "🎉🐻🥂";
-      
-      // 2. Hide No Button
       document.getElementById('noBtn').style.display = 'none';
 
-      // 3. Transform Yes Button
       var yes = document.getElementById('yesBtn');
       yes.innerText = "It's a Date!";
       yes.style.transform = "scale(1.2)";
       yes.style.backgroundColor = "#ff4757";
       yes.onclick = resetPage;
 
-      // 4. FUN EFFECTS ACTIVATED
       document.body.classList.add('party-mode'); 
       document.getElementById('mascot').classList.add('spin-bear'); 
 
-      // 5. Start Particles (Confetti + Floating Hearts)
       confettiInterval = setInterval(createConfetti, 50);
       heartInterval = setInterval(createFloatingHeart, 100); 
     }
 
     function resetPage() {
-      // 1. Stop Intervals
       clearInterval(confettiInterval);
       clearInterval(heartInterval);
       
-      // 2. Remove all particles
       document.querySelectorAll('.confetti').forEach(c => c.remove());
       document.querySelectorAll('.floater').forEach(c => c.remove());
 
-      // 3. Stop Fun Effects
       document.body.classList.remove('party-mode');
       document.getElementById('mascot').classList.remove('spin-bear');
 
-      // 4. Reset Text
       document.getElementById('mainText').innerText = "Manny, will you be my Valentine?";
       document.getElementById('mascot').innerText = "🐻";
 
-      // 5. Reset Buttons
       var no = document.getElementById('noBtn');
       no.style.display = 'inline-block';
       no.style.position = 'absolute'; 
@@ -255,10 +278,8 @@
     function createFloatingHeart() {
       var h = document.createElement('div');
       h.classList.add('floater');
-      // Random love emojis
       var emojis = ['❤️', '🌹', '💋', '🧸', '💍', '🥂'];
       h.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-      
       h.style.left = Math.random() * 100 + 'vw';
       h.style.animationDuration = (Math.random() * 3 + 3) + 's'; 
       document.body.appendChild(h);
